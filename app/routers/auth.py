@@ -1,5 +1,5 @@
 
-from fastapi import FastAPI,status,HTTPException,Response,Depends,APIRouter
+from fastapi import status,HTTPException,Response,Depends,APIRouter
 from app.models.user import User
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.user import UserCreate,UserOut,UserLogin
