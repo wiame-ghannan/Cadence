@@ -6,9 +6,17 @@ from app.schemas.user import UserCreate, UserOut
 from app.schemas.token import Token
 from app.database import get_db
 from app.services import auth_service
+from app.models.user import User
+from app.core.security import get_current_user
+
 
 
 router = APIRouter()
+
+
+@router.get("/users/me/", response_model=UserOut)
+async def read_users_me(current_user: User = Depends(get_current_user)):
+    return current_user
 
 
 @router.post("/users", status_code=status.HTTP_201_CREATED, response_model=UserOut)
