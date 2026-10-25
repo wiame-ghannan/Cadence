@@ -14,13 +14,14 @@ class CreateTask(BaseModel):
 
 
 class UpdateTask(BaseModel):
+    # Version of the task as seen by the client, required to detect conflicts
+    version: int
     title: Optional[str] = None
     description: Optional[str] = None
     status: Optional[TaskStatus] = None
     priority: Optional[TaskPriority] = None
     duration: Optional[int] = None
     assigned_to: Optional[int] = None
-
 
 class TaskOut(BaseModel):
     id: int

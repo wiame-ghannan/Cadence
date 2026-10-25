@@ -6,6 +6,7 @@ from app.models.task_dependency import TaskDependency
 from app.schemas.task import CreateTask, UpdateTask
 from app.services.project_member_service import check_is_owner
 from app.services.project_service import check_is_member
+from sqlalchemy import select, update
 
 
 async def _get_task_or_404(db: AsyncSession, task_id: int) -> Task:
@@ -70,26 +71,30 @@ async def list_tasks_by_project(db: AsyncSession, project_id: int, current_user_
 async def update_task(
     db: AsyncSession, task_id: int, task_data: UpdateTask, current_user_id: int
 ) -> Task:
-    task = await _get_task_or_404(db, task_id)
-    await check_is_member(db, task.project_id, current_user_id)
+    # get_task checks that the task exists and that the user is a member of its project
+    task = await get_task(db, task_id, current_user_id)
 
-    if task_data.title is not None:
-        task.title = task_data.title
-    if task_data.description is not None:
-        task.description = task_data.description
-    if task_data.status is not None:
-        task.status = task_data.status
-    if task_data.priority is not None:
-        task.priority = task_data.priority
-    if task_data.duration is not None:
-        task.duration = task_data.duration
-    if task_data.assigned_to is not None:
-        task.assigned_to = task_data.assigned_to
+    # Fields to change: everything the client sent, except the version itself
+    changes = task_data.model_dump(exclude_none=True, exclude={"version"})
+
+    # The database compares the version and updates in a single step
+    result = await db.execute(
+        update(Task)
+        .where(Task.id == task_id, Task.version == task_data.version)
+        .values(**changes, version=Task.version + 1)
+    )
+
+    # No row updated: someone else changed the task since the client read it
+    if result.rowcount == 0:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This task was modified by someone else, reload it and try again",
+        )
 
     await db.commit()
     await db.refresh(task)
     return task
-
 
 async def delete_task(db: AsyncSession, task_id: int, current_user_id: int) -> None:
     task = await _get_task_or_404(db, task_id)
