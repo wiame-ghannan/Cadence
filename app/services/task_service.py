@@ -19,7 +19,22 @@ async def _get_task_or_404(db: AsyncSession, task_id: int) -> Task:
 async def create_task(
     db: AsyncSession, project_id: int, task_data: CreateTask, current_user_id: int
 ) -> Task:
-    await check_is_member(db, project_id, current_user_id)
+    # Only an owner can create tasks
+    await check_is_owner(db, project_id, current_user_id)
+
+    # Every prerequisite must be an existing task of this same project
+    prerequisite_ids = set(task_data.depends_on)
+    if prerequisite_ids:
+        result = await db.execute(
+            select(Task.id).where(
+                Task.id.in_(prerequisite_ids), Task.project_id == project_id
+            )
+        )
+        if set(result.scalars().all()) != prerequisite_ids:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="depends_on must contain existing tasks of this project",
+            )
 
     new_task = Task(
         title=task_data.title,
@@ -32,11 +47,8 @@ async def create_task(
     db.add(new_task)
     await db.flush()
 
-    for depends_on_id in task_data.depends_on:
-        new_dependency = TaskDependency(
-            task_id=new_task.id, depends_on_task_id=depends_on_id
-        )
-        db.add(new_dependency)
+    for depends_on_id in prerequisite_ids:
+        db.add(TaskDependency(task_id=new_task.id, depends_on_task_id=depends_on_id))
 
     await db.commit()
     await db.refresh(new_task)
