@@ -9,7 +9,6 @@ class CreateTask(BaseModel):
     description: Optional[str] = None
     priority: TaskPriority
     duration: int
-    project_id: int
     assigned_to: Optional[int] = None
     depends_on: List[int] = []
 
