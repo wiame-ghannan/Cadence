@@ -16,5 +16,14 @@ class ProjectMember(Base):
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
     role: Mapped[ProjectRole] = mapped_column(Enum(ProjectRole), default=ProjectRole.MEMBER)
 
-    user: Mapped["User"] = relationship(back_populates="project_memberships")
+    # Always loaded with the member, so its name and email can be sent to the client
+    user: Mapped["User"] = relationship(back_populates="project_memberships", lazy="selectin")
     project: Mapped["Project"] = relationship(back_populates="members")
+
+    @property
+    def name(self) -> str:
+        return self.user.name
+
+    @property
+    def email(self) -> str:
+        return self.user.email

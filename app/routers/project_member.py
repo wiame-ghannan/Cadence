@@ -29,7 +29,7 @@ async def list_members(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return await project_member_service.list_members(db, project_id)
+    return await project_member_service.list_members(db, project_id, current_user.id)
 
 
 @router.patch("/projects/{project_id}/members/{user_id}", response_model=ProjectMemberOut)

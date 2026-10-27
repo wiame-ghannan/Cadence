@@ -1,7 +1,7 @@
 from pwdlib import PasswordHash
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User
-from sqlalchemy import select
+from sqlalchemy import select, func
 from datetime import datetime, timedelta, timezone
 import jwt
 from app.database import get_db
@@ -27,7 +27,8 @@ def get_password_hash(password):
     return password_hash.hash(password)
 
 async def get_user(db: AsyncSession,email:str):
-        user = await db.execute( select(User).where(User.email == email))
+        # Emails are compared without case: "Alice@x.com" and "alice@x.com" are the same account
+        user = await db.execute( select(User).where(func.lower(User.email) == email.lower()))
         return user.scalar_one_or_none()
      
          

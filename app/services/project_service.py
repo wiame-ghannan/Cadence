@@ -50,6 +50,7 @@ async def list_projects(db: AsyncSession, current_user_id: int) -> list[Project]
         select(Project)
         .join(ProjectMember, ProjectMember.project_id == Project.id)
         .where(ProjectMember.user_id == current_user_id)
+        .order_by(Project.id)
     )
     return result.scalars().all()
 
@@ -60,10 +61,12 @@ async def update_project(
     await check_is_owner(db, project_id, current_user_id)
     project = await _get_project_or_404(db, project_id)
 
-    if project_data.name is not None:
-        project.name = project_data.name
-    if project_data.description is not None:
-        project.description = project_data.description
+    # Only the fields the client sent; the name can never be null
+    changes = project_data.model_dump(exclude_unset=True)
+    if changes.get("name") is not None:
+        project.name = changes["name"]
+    if "description" in changes:
+        project.description = changes["description"]
 
     await db.commit()
     await db.refresh(project)

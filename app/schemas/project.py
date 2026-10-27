@@ -1,15 +1,17 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
+from app.schemas.user import NonEmptyStr
 
 
 class CreateProject(BaseModel):
-    name: str
+    name: NonEmptyStr
     description: Optional[str] = None
 
 
 class UpdateProject(BaseModel):
-    name: Optional[str] = None
+    # A field that is not sent stays unchanged; description=null clears it
+    name: Optional[NonEmptyStr] = None
     description: Optional[str] = None
 
 
