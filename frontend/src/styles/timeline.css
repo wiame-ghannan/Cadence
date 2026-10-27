@@ -1,0 +1,196 @@
+/* Planning view: one row per task, a bar from earliest start to earliest finish */
+.timeline {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.timeline-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.timeline-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: var(--font-size-sm);
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.legend-swatch {
+  width: 16px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.legend-critical {
+  background: var(--color-critical);
+}
+
+.legend-normal {
+  background: var(--color-accent);
+}
+
+.legend-slack {
+  border: 1.5px dashed var(--color-text-subtle);
+}
+
+/* The chart keeps a minimum width and scrolls sideways inside this box */
+.timeline-scroll {
+  overflow-x: auto;
+}
+
+.timeline-grid {
+  min-width: 640px;
+  padding: var(--space-2) var(--space-4) var(--space-4);
+}
+
+.timeline-row {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  align-items: center;
+  min-height: 44px;
+}
+
+.timeline-head {
+  min-height: 32px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.timeline-label-head {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Day numbers above the chart */
+.timeline-axis {
+  position: relative;
+  height: 20px;
+}
+
+/* Each label is centered on its day column, between two grid lines */
+.timeline-tick {
+  position: absolute;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Task name on the left, clickable to open it */
+.timeline-label {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  column-gap: var(--space-2);
+  align-items: center;
+  min-width: 0;
+  margin-right: var(--space-3);
+  padding: var(--space-1) var(--space-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  text-align: left;
+  transition: background var(--transition);
+}
+
+.timeline-label:hover {
+  background: var(--color-surface-hover);
+}
+
+.timeline-step {
+  grid-row: span 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-hover);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.timeline-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.timeline-dates {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* The track where bars are placed */
+.timeline-track {
+  position: relative;
+  height: 28px;
+}
+
+.timeline-gridline {
+  position: absolute;
+  top: -8px;
+  bottom: -8px;
+  width: 1px;
+  background: var(--color-border);
+}
+
+.timeline-bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  min-width: 4px;
+  padding: 0 var(--space-2);
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: #ffffff;
+  transition: filter var(--transition);
+}
+
+.timeline-bar:hover {
+  filter: brightness(1.1);
+}
+
+.timeline-bar.is-critical {
+  background: var(--color-critical);
+}
+
+.timeline-bar-label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Slack: how much later the task could finish without delaying the project */
+.timeline-slack {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  border: 1.5px dashed var(--color-text-subtle);
+  border-left: none;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+@media (max-width: 600px) {
+  .timeline-row {
+    grid-template-columns: 150px 1fr;
+  }
+}
