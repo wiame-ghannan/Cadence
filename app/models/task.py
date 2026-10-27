@@ -36,6 +36,9 @@ class Task(Base):
     dependencies: Mapped[List["TaskDependency"]] = relationship(
         foreign_keys="TaskDependency.task_id", back_populates="task", cascade="all, delete-orphan"
     )
+    # Deleting a task also deletes the dependencies of the tasks that waited for it
     dependents: Mapped[List["TaskDependency"]] = relationship(
-        foreign_keys="TaskDependency.depends_on_task_id", back_populates="depends_on_task"
+        foreign_keys="TaskDependency.depends_on_task_id",
+        back_populates="depends_on_task",
+        cascade="all, delete-orphan",
     )

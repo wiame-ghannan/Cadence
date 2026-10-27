@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from app.models.task import TaskStatus
 from app.models.task_dependency import TaskDependency
 from app.services.task_service import get_task
 from app.services.project_member_service import check_is_owner
@@ -38,6 +39,13 @@ async def add_dependency(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Both tasks must belong to the same project",
+        )
+
+    # A task that has already started cannot wait for an unfinished task
+    if task.status != TaskStatus.TODO and prerequisite.status != TaskStatus.DONE:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This task has already started, it cannot wait for a task that is not done",
         )
 
     # The dependency must not already exist
