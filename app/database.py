@@ -4,7 +4,8 @@ from app.config import get_settings
 
 settings=get_settings()
 
-engine = create_async_engine(settings.database_url)
+# pool_pre_ping reopens a connection that the host closed while the database slept
+engine = create_async_engine(settings.database_url, pool_pre_ping=True)
 
 SessionLocal = async_sessionmaker(
     bind=engine,
